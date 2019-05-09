@@ -70,55 +70,55 @@ L = L + sparse(interieur,interieur-1,1,J2,J2);
 L = L + sparse(interieur,interieur+J,1,J2,J2);
 L = L + sparse(interieur,interieur-J,1,J2,J2);
 
-% bords
-L = L + sparse(bordhaut,bordhaut+1,1,J2,J2);
-L = L + sparse(bordhaut,bordhaut+J-1,1,J2,J2);
-L = L + sparse(bordhaut,bordhaut+J,1,J2,J2);
-L = L + sparse(bordhaut,bordhaut-J,1,J2,J2);
-
-
-L = L + sparse(bordgauche,bordgauche+1,1,J2,J2);
-L = L + sparse(bordgauche,bordgauche-1,1,J2,J2);
-L = L + sparse(bordgauche,bordgauche+J,1,J2,J2);
-L = L + sparse(bordgauche,bordgauche+J*(J-1),1,J2,J2);
-
-L = L + sparse(bordbas,bordbas-(J-1),1,J2,J2);
-L = L + sparse(bordbas,bordbas-1,1,J2,J2);
-L = L + sparse(bordbas,bordbas+J,1,J2,J2);
-L = L + sparse(bordbas,bordbas-J,1,J2,J2);
-
-L = L + sparse(borddroit,borddroit+1,1,J2,J2);
-L = L + sparse(borddroit,borddroit-1,1,J2,J2);
-L = L + sparse(borddroit,borddroit-J*(J-1),1,J2,J2);
-L = L + sparse(borddroit,borddroit-J,1,J2,J2);
-
-% coins
-L(coinhautgauche,coinhautgauche+1) = 1;
-L(coinhautgauche,coinhautgauche+J-1) = 1;
-L(coinhautgauche,coinhautgauche+J) = 1;
-L(coinhautgauche,coinhautgauche+J*(J-1)) = 1;
-
-
-L(coinbasgauche,coinbasgauche-(J-1)) = 1;
-L(coinbasgauche,coinbasgauche-1) = 1;
-L(coinbasgauche,coinbasgauche+J) = 1;
-L(coinbasgauche,coinbasgauche+J*(J-1)) = 1;
-
-L(coinhautdroit,coinhautdroit+1) = 1;
-L(coinhautdroit,coinhautdroit+J-1) = 1;
-L(coinhautdroit,coinhautdroit-J*(J-1)) = 1;
-L(coinhautdroit,coinhautdroit-J) = 1;
-
-L(coinbasdroit,coinbasdroit-(J-1)) = 1;
-L(coinbasdroit,coinbasdroit-1) = 1;
-L(coinbasdroit,coinbasdroit-J*(J-1)) = 1;
-L(coinbasdroit,coinbasdroit-J) = 1;
+% % bords
+% L = L + sparse(bordhaut,bordhaut+1,1,J2,J2);
+% L = L + sparse(bordhaut,bordhaut+J-1,1,J2,J2);
+% L = L + sparse(bordhaut,bordhaut+J,1,J2,J2);
+% L = L + sparse(bordhaut,bordhaut-J,1,J2,J2);
+% 
+% 
+% L = L + sparse(bordgauche,bordgauche+1,1,J2,J2);
+% L = L + sparse(bordgauche,bordgauche-1,1,J2,J2);
+% L = L + sparse(bordgauche,bordgauche+J,1,J2,J2);
+% L = L + sparse(bordgauche,bordgauche+J*(J-1),1,J2,J2);
+% 
+% L = L + sparse(bordbas,bordbas-(J-1),1,J2,J2);
+% L = L + sparse(bordbas,bordbas-1,1,J2,J2);
+% L = L + sparse(bordbas,bordbas+J,1,J2,J2);
+% L = L + sparse(bordbas,bordbas-J,1,J2,J2);
+% 
+% L = L + sparse(borddroit,borddroit+1,1,J2,J2);
+% L = L + sparse(borddroit,borddroit-1,1,J2,J2);
+% L = L + sparse(borddroit,borddroit-J*(J-1),1,J2,J2);
+% L = L + sparse(borddroit,borddroit-J,1,J2,J2);
+% 
+% % coins
+% L(coinhautgauche,coinhautgauche+1) = 1;
+% L(coinhautgauche,coinhautgauche+J-1) = 1;
+% L(coinhautgauche,coinhautgauche+J) = 1;
+% L(coinhautgauche,coinhautgauche+J*(J-1)) = 1;
+% 
+% 
+% L(coinbasgauche,coinbasgauche-(J-1)) = 1;
+% L(coinbasgauche,coinbasgauche-1) = 1;
+% L(coinbasgauche,coinbasgauche+J) = 1;
+% L(coinbasgauche,coinbasgauche+J*(J-1)) = 1;
+% 
+% L(coinhautdroit,coinhautdroit+1) = 1;
+% L(coinhautdroit,coinhautdroit+J-1) = 1;
+% L(coinhautdroit,coinhautdroit-J*(J-1)) = 1;
+% L(coinhautdroit,coinhautdroit-J) = 1;
+% 
+% L(coinbasdroit,coinbasdroit-(J-1)) = 1;
+% L(coinbasdroit,coinbasdroit-1) = 1;
+% L(coinbasdroit,coinbasdroit-J*(J-1)) = 1;
+% L(coinbasdroit,coinbasdroit-J) = 1;
 
 % condition initiales
-Sp =   0.1*(rand(J^2,1)); 
+Sp(4020:4080)=1;
+%Sp =   0.1*(rand(J^2,1)); 
 %A = 0 + 0.1*(-0 + 0*rand(J^2,1));
 %R =  0.0 + 0.1*(-0 + 0*rand(J^2,1));
-
 
 % parametres de simulation, temps
 t0 = 0;
@@ -149,7 +149,7 @@ while t < tfinal
     R = newR;
     if tk > 10 
         t
-        surf(X,Y,reshape(A,J,J),'EdgeColor','none');
+        surf(X,Y,reshape(Sp,J,J),'EdgeColor','none');
         view(2)
         drawnow;
         tk = 0;
