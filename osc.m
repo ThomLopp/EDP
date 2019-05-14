@@ -15,7 +15,7 @@ function dydt = osc(t,y)
 
 %y est le vecteur de solutions y = S,P,A,R
     dydt=zeros(4,1);
-        
+    %dydt= [0.25,0.25,0.25,0.25,0.25]
     dydt(1)=-alpha*sigma-beta*(1-ksi)*y(1)*y(3)-beta*ksi*y(1)*y(2)+epsilon*y(2) +delta*y(4)+mu*(y(2)+y(4))+mu_*y(3);
     dydt(2)=alpha *y(1) -(epsilon+gama+mu)*y(2);
     dydt(3)=gama*y(1)+ sigma*y(4)+beta*(1-ksi)*y(1)*y(3)+beta*ksi*y(1)*y(2)+nu*y(4)*y(3)-(zeta+mu_)*y(3);
