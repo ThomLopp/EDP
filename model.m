@@ -1,13 +1,9 @@
 %% Turing 2D: FitzHugh-Nagumo 
 
 % parametre des equations
-epsilon = 0.08;
-b = 0.7;
-c = 0.8;
-Dv = 0.1;
-Dw = 0.005; 
-Dr=0.001;
-I = 0.32;
+Dv = 0.0001;%DS
+Dw = 0.01; %DA
+Dr = 0.0;%DR
 
 % parametres de simulation, espace
 % parametre des equations
@@ -43,25 +39,28 @@ J = length(x);
 J2 = J*J;
 
 % variable dynamiques
+
 Sp = zeros(J2,1); % stocke seulement l'etat au temps t
+Sp_ =reshape(Sp,J,J);
 A = zeros(J2,1);
+A_ = reshape(A,J,J);
 R = zeros(J2,1);
 newSp = zeros(J2,1);
 newA = zeros(J2,1);
 newR = zeros(J2,1);
 
-% Condition periodiques
+% % Condition periodiques
 L = sparse(1:J2,1:J2,-4); % matrice creuse, compacte en memoire
-coinhautgauche = 1;
-coinbasgauche = J;
-coinhautdroit = J*(J-1)+1;
-coinbasdroit = J2;
-bordgauche = 2:J-1;
-bordhaut = J+1:J:J*(J-2)+1;
-bordbas = 2*J:J:J*(J-1);
-borddroit = J*(J-1)+2:J2-1;
-bord = [coinhautgauche, coinhautdroit, coinbasgauche, coinbasdroit, ...
-    bordgauche, bordhaut, bordbas, borddroit];
+% coinhautgauche = 1;
+% coinbasgauche = J;
+% coinhautdroit = J*(J-1)+1;
+% coinbasdroit = J2;
+% bordgauche = 2:J-1;
+% bordhaut = J+1:J:J*(J-2)+1;
+% bordbas = 2*J:J:J*(J-1);
+% borddroit = J*(J-1)+2:J2-1;
+% bord = [coinhautgauche, coinhautdroit, coinbasgauche, coinbasdroit, ...
+%     bordgauche, bordhaut, bordbas, borddroit];
 interieur = setdiff(1:J2, bord);
 
 % interieur
@@ -115,7 +114,22 @@ L = L + sparse(interieur,interieur-J,1,J2,J2);
 % L(coinbasdroit,coinbasdroit-J) = 1;
 
 % condition initiales
-Sp(4020:4080)=1;
+Sp_(1:251,1:251)=10/(251*251);
+A_(1:100,1:100)=10/(251*251);
+% Sp_(141:251,1:100)=0.1;
+% Sp_(1:100,141:251)=0.1;
+% Sp_(141:251,141:251)=0.1;
+
+
+surf(X,Y,Sp_,'EdgeColor','none');
+view(2)
+drawnow;
+%pause
+
+
+
+Sp=reshape(Sp_,J2,1);
+A=reshape(A_,J2,1);
 %Sp =   0.1*(rand(J^2,1)); 
 %A = 0 + 0.1*(-0 + 0*rand(J^2,1));
 %R =  0.0 + 0.1*(-0 + 0*rand(J^2,1));
@@ -133,14 +147,14 @@ surf(X,Y,reshape(A,J,J),'EdgeColor','none');
 view(2)
 drawnow;
 tk = 0;
-pause
+%pause
 
 % BOUCLE PRINCIPALE
 while t < tfinal
     drawnow;
-    newSp = Sp + k*(-gama_.*Sp-beta_.*(1-ksi).*Sp.*A-beta_.*ksi_.*c1.*Sp.*Sp+delta.*R+mu.*(Sp.*c2+R)+mu_etoile.*A) + ...
+    newSp = Sp + k*(-gama_.*Sp-beta_.*(1-ksi).*Sp.*A-beta_.*ksi_.*c1.*Sp.*Sp+delta.*R+mu.*(R)+mu_etoile.*A) + ...
         Dv*k/h^2*L*Sp;
-    newA = A + k.*(gama_.*Sp+sigma.*R+beta_.*(1-ksi).*Sp.*A+beta_.*ksi_.*c1.*Sp.*Sp-nu.*R.*A-(zeta+mu_etoile).*A) +  ...
+    newA = A + k.*(gama_.*Sp+sigma.*R+beta_.*(1-ksi).*Sp.*A+beta_.*ksi_.*c1.*Sp.*Sp+nu.*R.*A-(zeta+mu_etoile).*A) +  ...
         Dw*k/h^2*L*A;
     newR = R + k*(zeta.*A-nu.*R.*A-(delta+sigma+mu).*R) +...
         Dr*k/h^2*L*R;
@@ -148,11 +162,16 @@ while t < tfinal
     A = newA;
     R = newR;
     if tk > 10 
-        t
-        surf(X,Y,reshape(Sp,J,J),'EdgeColor','none');
+        
+        surf(X,Y,reshape(A,J,J),'EdgeColor','none');
         view(2)
         drawnow;
         tk = 0;
+        s=sum(A+Sp+R);
+        s
+        t
+        
+        
     end
     t = t + k;
     tk = tk + k;
