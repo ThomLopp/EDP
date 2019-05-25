@@ -1,0 +1,187 @@
+
+% parametre de diffusion
+DS = 0.01;%DS
+DA = 0.01; %DA
+DR = 0.00;%DR
+
+
+%constantes
+alpha=0.15;
+epsilon=1;
+beta=0.0036;
+ksi=.74;
+gama=.00744;
+zeta=1;
+delta=0.1;
+nu=.2;
+sigma=.7;
+mu=0.007288;
+mu_etoile=0.01155;
+
+c1=alpha/(epsilon+gama+mu);
+beta_=beta/(1+c1);
+gama_=gama/(1+c1);
+ksi_=ksi/(1+c1);
+c2=c1/(1+c1);
+
+
+
+
+%taille du domaine
+s = 100; % taille domaine (carre sxs)
+h = 0.2;
+x0 = 0;
+x1 = s;
+y0 = 0;
+y1 = s;
+x = x0:h:x1;
+y = y0:h:y1;
+[X,Y] = meshgrid(x,y);
+J = length(x);
+J2 = J*J;
+
+
+
+%variables :
+%Sp_ in 2D Sp in 1D
+Sp_ = zeros(J,J);
+%Sp =reshape(Sp_,J2,1);
+A_ = zeros(J,J);
+%A =reshape(Sp_,J2,1);
+R_ = zeros(J,J);
+%R =reshape(Sp_,J2,1);
+
+
+%in 1D
+newSp = zeros(J2,1);
+newA = zeros(J2,1);
+newR = zeros(J2,1);
+
+
+%creation du laplacien; Pour ne pas avoir un Laplacien 3D nous allons
+%transormé notre espace en 1D et Le Laplacien est en alors en 2D
+
+%Trouvons le bords
+coinhautgauche = 1;
+coinbasgauche = J;
+coinhautdroit = J*(J-1)+1;
+coinbasdroit = J2;
+bordgauche = 2:J-1;
+bordhaut = J+1:J:J*(J-2)+1;
+bordbas = 2*J:J:J*(J-1);
+borddroit = J*(J-1)+2:J2-1;
+bord = [coinhautgauche, coinhautdroit, coinbasgauche, coinbasdroit, ...
+    bordgauche, bordhaut, bordbas, borddroit];
+ interieur = setdiff(1:J2, bord);
+
+ 
+L = sparse(1:J2,1:J2,-4);
+L = L + sparse(interieur,interieur+1,1,J2,J2);
+L = L + sparse(interieur,interieur-1,1,J2,J2);
+L = L + sparse(interieur,interieur+J,1,J2,J2);
+L = L + sparse(interieur,interieur-J,1,J2,J2);
+
+% L = L + sparse(1:(J2-1),(1:(J2-1))+1,1,J2,J2);%diagonal sup
+% L = L + sparse(2:(J2),(2:(J2))-1,1,J2,J2);%diagonal inf
+% L = L + sparse(1:(J2-J),(1:(J2-J))+J,1,J2,J2);%diagonal sup +J
+% L = L + sparse((J+1):J2,((J+1):J2)-J,1,J2,J2);%diagonal sup -J
+
+
+%bord haut
+
+C = sparse(1:J2,1:J2,1);
+C = C + sparse(bordgauche, bordgauche+J,1,J2,J2);
+C = C + sparse(borddroit, borddroit-J,1,J2,J2);
+C = C + sparse(bordhaut, bordhaut+1,1,J2,J2);
+C = C + sparse(bordbas, bordbas-1,1,J2,J2);
+
+C = C + sparse(coinhautgauche+1, coinhautgauche+J,1,J2,J2);
+C = C + sparse(coinhautdroit+1, coinhautdroit-J,1,J2,J2);
+C = C + sparse(coinbasgauche-1, coinbasgauche+J,1,J2,J2);
+C = C + sparse(coinbasdroit-1, coinbasdroit-J,1,J2,J2);
+
+C (bord,bord)=0;
+
+
+% condition initiales
+%Sp_(1:J2,1:J2)= 0.5;
+
+%A_(1,1)=0.5;
+% Sp_(141:251,1:100)=0.1;
+% Sp_(1:100,141:251)=0.1;
+% Sp_(141:251,141:251)=0.1;
+%Sp =   0.1*(rand(J^2,1)); (1:100,1:100)
+%A = 0 + 0.1*(-0 + 0*rand(J^2,1));
+%R =  0.0 + 0.1*(-0 + 0*rand(J^2,1));
+
+% parametres de simulation, temps
+t0 = 0;
+tfinal = 20000000; 
+t = t0;
+% k doit etre < a h^2/2/d/D ou dim d = 2
+k = min(1,0.2*( h^2/4/max(DS,DA) ));
+ 
+Sp=reshape(Sp_,J2,1);
+Sp(interieur)=0.99/(J2-4);%Sp(1:J2,1)=1;
+Sp()=0.99/(J2-4);
+A_(25:125,25:35)=0.01/(1000);
+A=reshape(A_,J2,1);
+
+
+R=reshape(R_,J2,1);
+
+figure(1); clf;
+surf(X,Y,reshape(A,J,J),'EdgeColor','none');
+view(2)
+drawnow;  
+tk = 0;
+s=sum(Sp);
+s
+
+pause
+
+
+
+% BOUCLE PRINCIPALE
+while t < tfinal
+    
+    newSp = Sp + k*(-gama_.*Sp-beta_.*(1-ksi).*Sp.*A-beta_.*ksi_.*c1.*Sp.*Sp+delta.*R+mu.*(R)+mu_etoile.*A) + ...
+        DS*k/h^2*L*Sp;
+    newA = A + k.*(gama_.*Sp+sigma.*R+beta_.*(1-ksi).*Sp.*A+beta_.*ksi_.*c1.*Sp.*Sp+nu.*R.*A-(zeta+mu_etoile).*A) +  ...
+        DA*k/h^2*L*A;
+    newR = R + k*(zeta.*A-nu.*R.*A-(delta+sigma+mu).*R) +...
+        DR*k/h^2*L*R;
+    %gestion des bords
+    newSp(bordgauche)=newSp(bordgauche+J);
+    newSp(bordhaut)=newSp(bordhaut+1);
+    newSp(borddroit)=newSp(borddroit-J);
+    newSp(bordbas)=newSp(bordbas-1);
+    
+    newA(bordgauche)=newA(bordgauche+J);
+    newA(bordhaut)=newA(bordhaut+1);
+    newA(borddroit)=newA(borddroit-J);
+    newA(bordbas)=newA(bordbas-1);
+    
+    newR(bordgauche)=newR(bordgauche+J);
+    newR(bordhaut)=newR(bordhaut+1);
+    newR(borddroit)=newR(borddroit-J);
+    newR(bordbas)=newR(bordbas-1);
+    
+    Sp = newSp;
+    A = newA;
+    R = newR;
+    tk
+    if tk > 10
+        surf(X,Y,reshape(R,J,J),'EdgeColor','none');
+        view(3)
+        drawnow;  
+        sp = sum(Sp);
+        a  = sum(A) ;
+        r  = sum(R) ;
+        a
+        %ohoh = sp+a+r;
+        %ohoh
+    end 
+    t = t + k;
+    tk = tk + k;
+end
